@@ -60,28 +60,50 @@ def get_tab2_info_box():
 # Layout for user to select time interval
 def get_interval_layout(tab):
 	id_name = tab+'-time-interval'
-	layout = html.Div(
-		dcc.RadioItems(id=id_name,
-                       options=[{'label':'1 Month', 'value':'1mo'},
-                                {'label':'3 Months', 'value':'3mo'},
-                                {'label':'6 Months', 'value':'6mo'},
-                                {'label':'YTD', 'value':'ytd'},
-                                {'label':'1 Year', 'value':'1y'},
-                                {'label':'3 Years', 'value':'3y'},
-                                {'label':'5 Years', 'value':'5y'}
-                       ],
-                       value='ytd'
-		), style={'text-align':'center'})
-	return layout
+	return html.Div(
+	    dcc.RadioItems(
+	        id=id_name,
+	        options=[
+	            {
+	                'label': '1 Month',
+	                'value': '1mo'
+	            },
+	            {
+	                'label': '3 Months',
+	                'value': '3mo'
+	            },
+	            {
+	                'label': '6 Months',
+	                'value': '6mo'
+	            },
+	            {
+	                'label': 'YTD',
+	                'value': 'ytd'
+	            },
+	            {
+	                'label': '1 Year',
+	                'value': '1y'
+	            },
+	            {
+	                'label': '3 Years',
+	                'value': '3y'
+	            },
+	            {
+	                'label': '5 Years',
+	                'value': '5y'
+	            },
+	        ],
+	        value='ytd',
+	    ),
+	    style={'text-align': 'center'},
+	)
 
 # Layout for graph, include time interval and graph
 def get_graph_layout(tab):
-	layout = html.Div([
-		html.Br(),
-		get_interval_layout(tab),
-		dcc.Graph(id=tab+'-vis')
-		])
-	return layout
+	return html.Div(
+	    [html.Br(),
+	     get_interval_layout(tab),
+	     dcc.Graph(id=tab + '-vis')])
 
 # Layout for table for stats
 def get_table_layout(tab):
@@ -102,11 +124,12 @@ def get_stats_graph_layout(tab):
 ##### Generate Plots and Tables#####
 # Generate Line charts for stocks and index
 def getLinePlot(df, tab):
-	traces = []
-	for col in df.columns:
-		if col != 'Date':
-			traces.append({'x':df['Date'], 'y':df[col],'name':col,
-				           'mode':'lines'})
+	traces = [{
+	    'x': df['Date'],
+	    'y': df[col],
+	    'name': col,
+	    'mode': 'lines'
+	} for col in df.columns if col != 'Date']
 	layout = {'xaxis':{'title':'Date'},
 	          'hovermode':False}
 	if tab == 1:
@@ -118,10 +141,15 @@ def getLinePlot(df, tab):
 
 # Generate candlestick
 def getCandlestick(df):
-	data = []
-	data.append(go.Candlestick(x=df['Date'], open=df['Open'],
-		                       high=df['High'], low=df['Low'],
-		                       close=df['Close']))
+	data = [
+	    go.Candlestick(
+	        x=df['Date'],
+	        open=df['Open'],
+	        high=df['High'],
+	        low=df['Low'],
+	        close=df['Close'],
+	    )
+	]
 	layout = {'xaxis':{'title':'Date','rangeslider':{'visible':False}},
 			  'yaxis':{'title':'Price ($)'},
 	          'hovermode':False}
@@ -133,11 +161,11 @@ def getTab1Table(df, stock_info):
 	# Format the day range of price
 	low_day = last_day['Low']
 	high_day = last_day['High']
-	range_day = f'{low_day:,.2f}'+' - '+f'{high_day:,.2f}'
+	range_day = f'{low_day:,.2f} - ' + f'{high_day:,.2f}'
 	# Obtain and format 52 weeks range of price
 	low_52weeks = df['Low'].min()
 	high_52weeks = df['High'].max()
-	range_52weeks = f'{low_day:,.2f}'+' - '+f'{high_day:,.2f}'
+	range_52weeks = f'{low_day:,.2f} - ' + f'{high_day:,.2f}'
 
 	# Format volume and average volume
 	vol = last_day['Volume']
@@ -228,10 +256,7 @@ def getTab1Table(df, stock_info):
 
 # Generate Table for Tab 2 - Index
 def getTab2Table(name, last_close, range_period, range_52weeks):
-	if last_close >= 0:
-		color = 'green'
-	else:
-		color = 'red'
+	color = 'green' if last_close >= 0 else 'red'
 	last_close = last_close = f'{last_close:.2f}%'
 	return html.Table([
 		html.Tr(html.Td(html.B(name))),

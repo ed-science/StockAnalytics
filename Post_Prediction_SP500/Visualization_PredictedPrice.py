@@ -11,9 +11,13 @@ def generate_line_chart(df_train, df_pred, ticker):
 	          'xaxis':{'title':'Date'}, 
 		      'yaxis':{'title':'Stock Price ($)'},
 	          'hovermode':False, 'plot_bgcolor':'white'}
-	data = []
-	data.append(go.Scatter(x=df_train['tradedate'], y=df_train['closeprice'],
-		                   name='Real Stock Price'))
+	data = [
+	    go.Scatter(
+	        x=df_train['tradedate'],
+	        y=df_train['closeprice'],
+	        name='Real Stock Price',
+	    )
+	]
 	data.append(go.Scatter(x=df_pred['tradedate'], y=df_pred['closeprice'],
 		                   name='Predicted Price of '+ticker))
 
@@ -41,5 +45,5 @@ df_train = pd.io.sql.read_sql(query_real, conn)
 df_pred = pd.io.sql.read_sql(query_pred, conn)
 
 figure = generate_line_chart(df_train, df_pred, ticker)
-filepath = 'stockprice_pred_'+ticker+'.html'
+filepath = f'stockprice_pred_{ticker}.html'
 figure.write_html(filepath)

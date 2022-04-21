@@ -15,6 +15,4 @@ for index, row in df_divisor.iterrows():
 		insert_divisor(conn, row['Tradedate'], row['Divisor'])
 	except:
 		print('Error ')
-		pass
-
 conn.close()

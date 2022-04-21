@@ -26,16 +26,16 @@ for index, row in companylist.iterrows():
 	curr_ticker = row['Ticker']
 	curr_company = row['Company']
 	curr_yfobj = yfinance.Ticker(curr_ticker)
-	curr_metadata = {}
 	# Print Progress
 	print('Currently processing data on ',curr_ticker)
-	# Upload metadata
-	curr_metadata['ticker'] = curr_ticker
-	curr_metadata['companyname'] = curr_company
-	curr_metadata['gicssector'] = row['GICSSector']
-	curr_metadata['gicssubindustry'] = row['GICSSubIndustry']
-	curr_metadata['countrystockmarket'] = 'United States'
-	curr_metadata['indexcomponent'] = 'S&P 500'
+	curr_metadata = {
+	    'ticker': curr_ticker,
+	    'companyname': curr_company,
+	    'gicssector': row['GICSSector'],
+	    'gicssubindustry': row['GICSSubIndustry'],
+	    'countrystockmarket': 'United States',
+	    'indexcomponent': 'S&P 500',
+	}
 	try:
 		insert_meta(conn, curr_metadata)
 	except:
@@ -67,7 +67,7 @@ for index, row in companylist.iterrows():
 	# Update time log
 	curr_endtime = datetime.now()
 	curr_time = str(curr_endtime - curr_starttime)
-	
+
 	time_log['Ticker'].append(curr_ticker)
 	time_log['Timer'].append(curr_time)
 	print(f'{curr_time} was spent on processing {curr_ticker}')

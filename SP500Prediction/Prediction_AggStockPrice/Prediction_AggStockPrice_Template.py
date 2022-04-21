@@ -22,10 +22,10 @@ query_shares = """select l.ticker, l.shareoutstanding
 shares_list = pd.io.sql.read_sql(query_shares, conn)
 tickers = shares_list['ticker'].tolist()
 
-ticker2shares = {}
-for index, row in shares_list.iterrows():
-	ticker2shares[row['ticker']] = row['shareoutstanding']
-
+ticker2shares = {
+    row['ticker']: row['shareoutstanding']
+    for index, row in shares_list.iterrows()
+}
 # Obtain stock price
 query_prices = """select ticker, tradedate, closeprice
                   from stock.stockprice

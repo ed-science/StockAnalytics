@@ -37,10 +37,10 @@ def insert_share(conn, ticker, share_num):
 
 # Function to insert prediction to database
 def insert_pred(conn, table, ticker, row):
-	# Query
-	query = """insert into stock.{} (ticker, tradedate,
-	           closeprice)""".format(table)
-	query += """values (%s, %s, %s)"""
+	query = (
+	    """insert into stock.{} (ticker, tradedate,
+	           closeprice)""".
+	    format(table) + """values (%s, %s, %s)""")
 	data = (ticker, row['ds'], row['yhat'])
 	cur = conn.cursor()
 	cur.execute(query, data)

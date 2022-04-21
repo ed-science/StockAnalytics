@@ -37,7 +37,7 @@ for ticker in tickers['ticker'].tolist():
 	X_test = pd.io.sql.read_sql(query_test, conn)
 	X_test.columns = ['ds','closeprice']
 	X_test_ds = pd.DataFrame(X_test['ds'])
-	
+
 	# For calculate SST
 	y_bar = X_test['closeprice'].mean()
 
@@ -55,27 +55,7 @@ for ticker in tickers['ticker'].tolist():
 
 		for method in methods:
 			# For holt-winters method
-			if method == 'hw':
-				try:
-					# Train Model
-					model = ExponentialSmoothing(X_train['closeprice'],
-						             trend='add', seasonal='add',
-						             seasonal_periods=4).fit()
-					# Predict
-					pred = model.forecast(X_test.shape[0])
-					X_test['yhat'] = pred.tolist()
-					# Calculate R-square
-					X_test['st'] = (X_test['closeprice']-y_bar)**2
-					X_test['se'] = (X_test['closeprice']-X_test['yhat'])**2
-					r_square = 1-(X_test['se'].sum()/X_test['st'].sum())
-					# Store result
-					result_ticker.append(((year, method), r_square))
-					preds[(year, method)] = X_test
-				except:
-					pass
-
-			# For Facebook Prophet
-			elif method == 'fbp':
+			if method == 'fbp':
 				# Train Model
 				X_train_copy = X_train.copy()
 				X_train_copy.columns = ['ds', 'y']
@@ -95,30 +75,40 @@ for ticker in tickers['ticker'].tolist():
 				except:
 					pass
 
+			elif method == 'hw':
+				try:
+					# Train Model
+					model = ExponentialSmoothing(X_train['closeprice'],
+						             trend='add', seasonal='add',
+						             seasonal_periods=4).fit()
+					# Predict
+					pred = model.forecast(X_test.shape[0])
+					X_test['yhat'] = pred.tolist()
+					# Calculate R-square
+					X_test['st'] = (X_test['closeprice']-y_bar)**2
+					X_test['se'] = (X_test['closeprice']-X_test['yhat'])**2
+					r_square = 1-(X_test['se'].sum()/X_test['st'].sum())
+					# Store result
+					result_ticker.append(((year, method), r_square))
+					preds[(year, method)] = X_test
+				except:
+					pass
+
 	result_ticker = sorted(result_ticker,key=lambda x:x[1], reverse=True)
 	rsquare_best = result_ticker[0][1]
 	chosen_pred = preds[result_ticker[0][0]]
 	# If rsquare is greater than 0, go to good staging database
-	if rsquare_best > 0:
-		for index, row in chosen_pred.iterrows():
-			try:
+	for index, row in chosen_pred.iterrows():
+		try:
+			if rsquare_best > 0:
 				insert_pred(conn, 'pred_dy_staging_sp500_good', ticker, row)
-			except:
-				error_log['Ticker'].append(ticker)
-				error_log['transaction_date'].append(row['ds'])
-				error_log['Database'].append('Good Staging')
-				error_log['Error'].append('Insertion Error')
-
-	# Else, go to bad staging database
-	else:
-		for index, row in chosen_pred.iterrows():
-			try:
+			else:
 				insert_pred(conn, 'pred_dy_staging_sp500_bad', ticker, row)
-			except:
-				error_log['Ticker'].append(ticker)
-				error_log['transaction_date'].append(row['ds'])
-				error_log['Database'].append('Good Staging')
-				error_log['Error'].append('Insertion Error')
+		except:
+			error_log['Ticker'].append(ticker)
+			error_log['transaction_date'].append(row['ds'])
+			error_log['Database'].append('Good Staging')
+			error_log['Error'].append('Insertion Error')
 
 	# Insert the result to data batabase
 	insert_result(conn, ticker, rsquare_best, 

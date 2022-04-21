@@ -43,7 +43,7 @@ for ticker in tickers['ticker'].tolist():
 	X_test = pd.io.sql.read_sql(query_test, conn)
 	X_test.columns = ['ds','closeprice']
 	X_test_ds = pd.DataFrame(X_test['ds'])
-	
+
 	# For calculate SST
 	y_bar = X_test['closeprice'].mean()
 
@@ -58,7 +58,7 @@ for ticker in tickers['ticker'].tolist():
 	                 date_part('year', tradedate)
 	                 between {} and 2018""".format(ticker, year)
 		X_train = pd.io.sql.read_sql(query_train, conn)
-		
+
 		# Train Model
 		X_train_copy = X_train.copy()
 		X_train_copy.columns = ['ds', 'y']
@@ -113,10 +113,10 @@ conn.close()
 
 # Save error log
 error_log = pd.DataFrame(error_log)
-filepath = 'Logs/ErrorLog_Pred_ProtoPrice_{}.csv'.format(num_end)
+filepath = f'Logs/ErrorLog_Pred_ProtoPrice_{num_end}.csv'
 error_log.to_csv(filepath, index=False)
 
 # Save timer log
 time_log = pd.DataFrame(time_log)
-filepath = 'Logs/TimeLog_Pred_ProtoPrice_{}.csv'.format(num_end)
+filepath = f'Logs/TimeLog_Pred_ProtoPrice_{num_end}.csv'
 time_log.to_csv(filepath, index=False)

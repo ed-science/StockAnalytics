@@ -38,15 +38,19 @@ def get_sp500():
 					from stock.pred_proto_sp500 
 					where date_part('year', tradedate) >= 2019
 					order by 1; """
-	
+
 	df_train = pd.io.sql.read_sql(query_train, conn)
 	df_pred = pd.io.sql.read_sql(query_pred, conn)
 
-	data = []
+	data = [
+	    go.Scatter(
+	        x=df_train['tradedate'],
+	        y=df_train['sp500'],
+	        name='S&P 500',
+	        line={'color': 'royalblue'},
+	    )
+	]
 
-	# Add real world data
-	data.append(go.Scatter(x=df_train['tradedate'], y=df_train['sp500'],
-		                   name='S&P 500', line={'color':'royalblue'}))
 	# Add prediction data
 	data.append(go.Scatter(x=df_pred['tradedate'], y=df_pred['sp500_pred'],
 		                   name='Prediction', 

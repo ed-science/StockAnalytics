@@ -12,8 +12,7 @@ def generate_line_chart(df_train, df_pred, pred_type):
 	layout = {'xaxis':{'title':'Date'}, 
 		      'yaxis':{'title':'Index'},
 	          'hovermode':False}
-	data = []
-	data.append(go.Scatter(x=df_train['ds'], y=df_train['y'],name='S&P 500'))
+	data = [go.Scatter(x=df_train['ds'], y=df_train['y'], name='S&P 500')]
 	data.append(go.Scatter(x=df_pred['ds'], y=df_pred['yhat'],
 		                   name=pred_type))
 

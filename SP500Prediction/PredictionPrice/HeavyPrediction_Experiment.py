@@ -26,7 +26,7 @@ for ticker in tickers['ticker'].tolist():
 	                between 2019 and 2020 order by tradedate""".format(ticker)
 	X_test = pd.io.sql.read_sql(query_test, conn)
 	X_test_ds = pd.DataFrame(X_test['tradedate'])
-	X_test_ds.columns = ['ds']  
+	X_test_ds.columns = ['ds']
 	y_bar = X_test['closeprice'].mean()
 
 	result_ticker = []
@@ -39,16 +39,7 @@ for ticker in tickers['ticker'].tolist():
 		X_train = pd.io.sql.read_sql(query_train, conn)
 
 		for method in methods:
-			if method == 'hw':
-				model = ExponentialSmoothing(X_train['closeprice'], trend='add', 
-		                         seasonal='add', seasonal_periods=4).fit()
-				pred = model.forecast(X_test.shape[0])
-				X_test['predictprice'] = pred.tolist()
-				X_test['st'] = (X_test['closeprice']-y_bar)**2
-				X_test['se'] = (X_test['closeprice']-X_test['predictprice'])**2
-				r_square = 1-(X_test['se'].sum()/X_test['st'].sum())
-				result_ticker.append(((year, method), r_square))
-			elif method == 'fbp':
+			if method == 'fbp':
 				X_train_copy = X_train.copy()
 				X_train_copy.columns = ['ds', 'y']
 				model = Prophet()
@@ -59,6 +50,15 @@ for ticker in tickers['ticker'].tolist():
 				pred['st'] = (pred['closeprice']-y_bar)**2
 				pred['se'] = (pred['closeprice']-pred['yhat'])**2
 				r_square = 1-(pred['se'].sum()/pred['st'].sum())
+				result_ticker.append(((year, method), r_square))
+			elif method == 'hw':
+				model = ExponentialSmoothing(X_train['closeprice'], trend='add', 
+				seasonal='add', seasonal_periods=4).fit()
+				pred = model.forecast(X_test.shape[0])
+				X_test['predictprice'] = pred.tolist()
+				X_test['st'] = (X_test['closeprice']-y_bar)**2
+				X_test['se'] = (X_test['closeprice']-X_test['predictprice'])**2
+				r_square = 1-(X_test['se'].sum()/X_test['st'].sum())
 				result_ticker.append(((year, method), r_square))
 	result_ticker = sorted(result_ticker,key=lambda x:x[1], reverse=True)
 	results['ticker'].append(ticker)

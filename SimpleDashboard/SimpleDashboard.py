@@ -55,31 +55,24 @@ def verify_ticker(ticker, mkt):
 	# For Hong Kong Stocks
 	if mkt == 'hk':
 		tick = re.findall('^\d{1,5}$', ticker)
-		if len(tick)>0:
-			tick = str(tick[0])[::-1]
-			while(len(tick)<4):
-				tick += '0'
-			tick = tick[::-1]
-			tick += '.HK'
-			return True, tick
-		# If entered ticker invalid
-		else:
+		if len(tick) <= 0:
 			return False, None
-	#
+		tick = str(tick[0])[::-1]
+		while(len(tick)<4):
+			tick += '0'
+		tick = tick[::-1]
+		tick += '.HK'
+		return True, tick
 	elif mkt == 'us':
 		tick = re.findall('^[A-Za-z]{1,4}$', ticker)
-		if len(tick)>0:
-			return True, tick[0].upper()
-		# If entered ticker invalid
-		else:
-			return False, None
+		return (True, tick[0].upper()) if len(tick)>0 else (False, None)
 	return False, None
 
 # Obtain 50- ,100- and 200-day moving average
 def getMA(stock, time, date_list):
 	if 'mo' in time or time=='ytd' or time=='1y':
 		df = stock.history(period='2y')
-	elif time=='2y' or time=='3y' or time=='4y':
+	elif time in ['2y', '3y', '4y']:
 		df = stock.history(period='5y')
 	else:
 		df = stock.history(period='10y')
